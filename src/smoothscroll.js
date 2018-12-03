@@ -1,10 +1,12 @@
 'use strict';
 
 // polyfill
-function polyfill() {
+function polyfill(opts = {}) {
   // aliases
   var w = window;
   var d = document;
+  var scrollTime = opts.scrollTime || 468;
+  var easeFunc = opts.easeFunc;
 
   // return if scroll behavior is supported and polyfill is not forced
   if (
@@ -16,7 +18,6 @@ function polyfill() {
 
   // globals
   var Element = w.HTMLElement || w.Element;
-  var SCROLL_TIME = 468;
 
   // object gathering original scroll methods
   var original = {
@@ -70,6 +71,10 @@ function polyfill() {
    * @returns {Number}
    */
   function ease(k) {
+    if (easeFunc) {
+      return easeFunc(k);
+    }
+
     return 0.5 * (1 - Math.cos(Math.PI * k));
   }
 
@@ -180,7 +185,7 @@ function polyfill() {
     var value;
     var currentX;
     var currentY;
-    var elapsed = (time - context.startTime) / SCROLL_TIME;
+    var elapsed = (time - context.startTime) / scrollTime;
 
     // avoid elapsed times higher than one
     elapsed = elapsed > 1 ? 1 : elapsed;
@@ -254,14 +259,14 @@ function polyfill() {
         arguments[0].left !== undefined
           ? arguments[0].left
           : typeof arguments[0] !== 'object'
-            ? arguments[0]
-            : w.scrollX || w.pageXOffset,
+          ? arguments[0]
+          : w.scrollX || w.pageXOffset,
         // use top prop, second argument if present or fallback to scrollY
         arguments[0].top !== undefined
           ? arguments[0].top
           : arguments[1] !== undefined
-            ? arguments[1]
-            : w.scrollY || w.pageYOffset
+          ? arguments[1]
+          : w.scrollY || w.pageYOffset
       );
 
       return;
@@ -293,10 +298,14 @@ function polyfill() {
         w,
         arguments[0].left !== undefined
           ? arguments[0].left
-          : typeof arguments[0] !== 'object' ? arguments[0] : 0,
+          : typeof arguments[0] !== 'object'
+          ? arguments[0]
+          : 0,
         arguments[0].top !== undefined
           ? arguments[0].top
-          : arguments[1] !== undefined ? arguments[1] : 0
+          : arguments[1] !== undefined
+          ? arguments[1]
+          : 0
       );
 
       return;
@@ -330,11 +339,15 @@ function polyfill() {
         // use left prop, first number argument or fallback to scrollLeft
         arguments[0].left !== undefined
           ? ~~arguments[0].left
-          : typeof arguments[0] !== 'object' ? ~~arguments[0] : this.scrollLeft,
+          : typeof arguments[0] !== 'object'
+          ? ~~arguments[0]
+          : this.scrollLeft,
         // use top prop, second argument or fallback to scrollTop
         arguments[0].top !== undefined
           ? ~~arguments[0].top
-          : arguments[1] !== undefined ? ~~arguments[1] : this.scrollTop
+          : arguments[1] !== undefined
+          ? ~~arguments[1]
+          : this.scrollTop
       );
 
       return;
